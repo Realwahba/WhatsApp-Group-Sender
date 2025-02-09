@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WhatsApp Sender</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background: #f5f5f5;
+            min-height: 100vh;
+        }
+
+        .app-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .status-bar {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .connection-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #4caf50;
+        }
+
+        .status-dot.disconnected {
+            background: #f44336;
+        }
+
+        .qr-section {
+            width: 150px;
+            height: 150px;
+            background: #f5f5f5;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #eee;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 20px;
+        }
+
+        .content-section, .control-section {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .panel {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .panel-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .image-slot {
+            aspect-ratio: 1;
+            background: #f5f5f5;
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .image-slot:hover {
+            border-color: #4caf50;
+            color: #4caf50;
+            background: #f1f8e9;
+        }
+
+        .preview-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 6px;
+        }
+
+        .message-input {
+            width: 100%;
+            min-height: 120px;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            resize: vertical;
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 5px;
+        }
+
+        .message-input:focus {
+            outline: none;
+            border-color: #4caf50;
+        }
+
+        .message-counter {
+            text-align: right;
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .group-select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        .group-select:focus {
+            outline: none;
+            border-color: #4caf50;
+        }
+
+        .selected-groups {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .group-tag {
+            background: #f1f8e9;
+            color: #2e7d32;
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .remove-group {
+            cursor: pointer;
+            width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(46, 125, 50, 0.1);
+            border-radius: 50%;
+            font-size: 14px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-primary {
+            background: #4caf50;
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: #43a047;
+        }
+
+        .btn-secondary {
+            background: #f5f5f5;
+            color: #333;
+            border: 1px solid #ddd;
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: #eeeeee;
+        }
+
+        .schedule-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .schedule-type {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .schedule-option {
+            padding: 10px;
+            text-align: center;
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 13px;
+        }
+
+        .schedule-option.active {
+            background: #f1f8e9;
+            border-color: #4caf50;
+            color: #2e7d32;
+        }
+
+        .schedule-details {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .time-input-group {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .time-input {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 13px;
+        }
+
+        .remove-time {
+            padding: 8px;
+            background: #ffebee;
+            color: #c62828;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .day-schedule {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+
+        .day-schedule h4 {
+            margin-bottom: 10px;
+            color: #2e7d32;
+            font-size: 14px;
+        }
+
+        .time-list {
+            margin-bottom: 10px;
+        }
+
+        .status-message {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .status-message.success {
+            background: #f1f8e9;
+            color: #2e7d32;
+            display: block;
+        }
+
+        .status-message.error {
+            background: #ffebee;
+            color: #c62828;
+            display: block;
+        }
+
+        #countdown {
+            text-align: center;
+            padding: 12px;
+            background: #f5f5f5;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 14px;
+            color: #333;
+            margin-top: 15px;
+        }
+
+        .send-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .image-count-selector {
+            margin-bottom: 15px;
+        }
+
+        .activity-panel {
+            margin-top: 20px;
+        }
+
+        .activity-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .activity-item {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border: 1px solid;
+            font-size: 14px;
+        }
+
+        .activity-item.success {
+            background: #f1f8e9;
+            border-color: #a5d6a7;
+            color: #2e7d32;
+        }
+
+        .activity-item.failure {
+            background: #ffebee;
+            border-color: #ef9a9a;
+            color: #c62828;
+        }
+
+        .activity-time {
+            font-size: 12px;
+            color: #666;
+            margin-top: 4px;
+        }
+
+        /* RTL Support */
+        .message-input[dir="rtl"] {
+            text-align: right;
+            font-family: "Traditional Arabic", "Arabic Typesetting", serif;
+            font-size: 18px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .app-container {
+                padding: 10px;
+            }
+            
+            .image-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="status-bar">
+            <div class="connection-status">
+                <div class="status-dot"></div>
+                <span id="connection-text">Waiting for connection...</span>
+            </div>
+            <div class="qr-section" id="qr-container">
+                <div id="qr-placeholder">Scan QR Code</div>
+                <img id="qr-code" style="display: none; width: 100%; height: 100%;" />
+            </div>
+        </div>
+
+        <div class="main-grid">
+            <div class="content-section">
+                <div class="panel">
+                    <div class="panel-title">Content</div>
+                    <div class="image-grid" id="image-grid">
+                        <div class="image-slot">
+                            <span class="slot-text">Image 1</span>
+                            <img class="preview-image" style="display: none;">
+                        </div>
+                        <div class="image-slot">
+                            <span class="slot-text">Image 2</span>
+                            <img class="preview-image" style="display: none;">
+                        </div>
+                        <div class="image-slot">
+                            <span class="slot-text">Image 3</span>
+                            <img class="preview-image" style="display: none;">
+                        </div>
+                        <div class="image-slot">
+                            <span class="slot-text">Image 4</span>
+                            <img class="preview-image" style="display: none;">
+                        </div>
+                    </div>
+                    <textarea 
+                        class="message-input" 
+                        id="message-input" 
+                        placeholder="Enter your message here..."
+                        maxlength="4096"
+                        dir="auto"
+                    ></textarea>
+                    <div class="message-counter" id="message-counter">0/4096 characters</div>
+                </div>
+            </div>
+            <div class="control-section">
+                <div class="panel">
+                    <div class="panel-title">Send Settings</div>
+                    <select class="group-select" id="group-select">
+                        <option value="">Select WhatsApp Group</option>
+                    </select>
+
+                    <div class="selected-groups" id="selected-groups"></div>
+
+                    <div id="status" class="status-message"></div>
+
+                    <div class="image-count-selector">
+                        <label class="panel-title" style="font-size: 14px;">Number of images to send</label>
+                        <select id="image-count" class="group-select" style="margin-top: 8px;">
+                            <option value="1">1 Image</option>
+                            <option value="2">2 Images</option>
+                            <option value="3">3 Images</option>
+                            <option value="4" selected>4 Images</option>
+                        </select>
+                    </div>
+
+                    <div class="send-options">
+                        <button id="send-message" class="btn btn-secondary" disabled>
+                            Send Message Only
+                        </button>
+                        <button id="send-with-images" class="btn btn-primary" disabled>
+                            Send With Images
+                        </button>
+                    </div>
+
+                    <div class="schedule-section">
+                        <div class="schedule-type">
+                            <div class="schedule-option" data-type="interval">Interval</div>
+                            <div class="schedule-option" data-type="daily">Daily</div>
+                            <div class="schedule-option" data-type="custom">Custom</div>
+                        </div>
+
+                        <div class="schedule-details" id="schedule-details"></div>
+
+                        <button id="start-schedule" class="btn btn-secondary" disabled>
+                            Start Schedule
+                        </button>
+                        <button id="stop-schedule" class="btn btn-secondary" disabled>
+                            Stop Schedule
+                        </button>
+
+                        <div id="countdown">Next send in: --:--:--</div>
+                    </div>
+                </div>
+
+                <!-- Activity Panel -->
+                <div class="panel activity-panel">
+                    <div class="panel-title">Recent Activity</div>
+                    <div class="activity-list" id="activity-list"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { ipcRenderer } = require('electron');
+
+        // Elements
+        const elements = {
+            qrContainer: document.getElementById('qr-container'),
+            qrPlaceholder: document.getElementById('qr-placeholder'),
+            qrCode: document.getElementById('qr-code'),
+            status: document.getElementById('status'),
+            groupSelect: document.getElementById('group-select'),
+            selectedGroupsContainer: document.getElementById('selected-groups'),
+            messageInput: document.getElementById('message-input'),
+            messageCounter: document.getElementById('message-counter'),
+            sendMessageBtn: document.getElementById('send-message'),
+            sendWithImagesBtn: document.getElementById('send-with-images'),
+            startScheduleBtn: document.getElementById('start-schedule'),
+            stopScheduleBtn: document.getElementById('stop-schedule'),
+            scheduleDetails: document.getElementById('schedule-details'),
+            countdown: document.getElementById('countdown'),
+            connectionText: document.getElementById('connection-text'),
+            statusDot: document.querySelector('.status-dot'),
+            activityList: document.getElementById('activity-list'),
+            imageCount: document.getElementById('image-count'),
+            imageSlots: Array.from(document.querySelectorAll('.image-slot'))
+        };
+
+        // State Management
+        const state = {
+            selectedGroups: new Set(),
+            scheduleType: 'interval'
+        };
+
+        // Template Generators
+        const scheduleTemplates = {
+            interval: () => {
+                return `
+                    <div class="time-input-group">
+                        <input type="number" class="time-input" id="interval-hours" min="1" max="168" value="24">
+                        <span>hours</span>
+                    </div>
+                `;
+            },
+            daily: () => {
+                return `
+                    <div id="daily-times-list"></div>
+                    <button class="btn btn-secondary" onclick="addDailyTime()">Add Time</button>
+                `;
+            },
+            custom: () => {
+                const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+                return days.map((day, index) => `
+                    <div class="day-schedule" data-day="${index}">
+                        <h4>${day}</h4>
+                        <div class="time-list"></div>
+                        <button class="btn btn-secondary" onclick="addCustomTime(${index})">Add Time</button>
+                    </div>
+                `).join('');
+            }
+        };
+
+        // Activity Management
+        function updateActivityList(activities) {
+            elements.activityList.innerHTML = '';
+            
+            if (activities.length === 0) {
+                elements.activityList.innerHTML = `
+                    <div class="activity-item">No recent activities</div>
+                `;
+                return;
+            }
+
+            activities.forEach(activity => {
+                const div = document.createElement('div');
+                div.className = `activity-item ${activity.success ? 'success' : 'failure'}`;
+                
+                const content = activity.imageCount > 0 
+                    ? `${activity.imageCount} images sent to ${activity.groupName}`
+                    : `Message sent to ${activity.groupName}`;
+                
+                div.innerHTML = `
+                    <div>${content}</div>
+                    <div class="activity-time">${new Date(activity.timestamp).toLocaleString()}</div>
+                `;
+                
+                elements.activityList.appendChild(div);
+            });
+        }
+
+        // Update Handlers
+        function updateStatus(message, type = '') {
+            elements.status.textContent = message;
+            elements.status.className = `status-message ${type}`;
+            elements.status.style.display = 'block';
+            
+            if (type !== 'error') {
+                setTimeout(() => {
+                    elements.status.style.display = 'none';
+                }, 5000);
+            }
+        }
+
+        function enableControls(enabled) {
+            const hasSelectedGroups = state.selectedGroups.size > 0;
+            const hasMessage = elements.messageInput.value.trim().length > 0;
+            
+            elements.sendMessageBtn.disabled = !enabled || !hasSelectedGroups || !hasMessage;
+            elements.sendWithImagesBtn.disabled = !enabled || !hasSelectedGroups;
+            elements.startScheduleBtn.disabled = !enabled || !hasSelectedGroups;
+            elements.stopScheduleBtn.disabled = !enabled;
+            
+            elements.statusDot.classList.toggle('disconnected', !enabled);
+        }
+
+        function updateScheduleDetails(type) {
+            state.scheduleType = type;
+            const template = scheduleTemplates[type];
+            if (template) {
+                elements.scheduleDetails.innerHTML = template();
+            }
+        }
+
+        function updateSelectedGroupsDisplay() {
+            elements.selectedGroupsContainer.innerHTML = '';
+            state.selectedGroups.forEach(group => {
+                const tag = document.createElement('div');
+                tag.className = 'group-tag';
+                
+                const nameSpan = document.createElement('span');
+                nameSpan.textContent = group.name;
+                
+                const removeBtn = document.createElement('span');
+                removeBtn.className = 'remove-group';
+                removeBtn.textContent = '×';
+                
+                removeBtn.addEventListener('click', () => {
+                    state.selectedGroups.delete(group);
+                    tag.remove();
+                    enableControls(true);
+                });
+                
+                tag.append(nameSpan, removeBtn);
+                elements.selectedGroupsContainer.appendChild(tag);
+            });
+        }
+
+        // Image Preview Management
+        async function updateImagePreviews() {
+            try {
+                const imageFiles = await ipcRenderer.invoke('get-image-queue');
+                const selectedCount = parseInt(elements.imageCount.value);
+                
+                elements.imageSlots.forEach((slot, index) => {
+                    const slotText = slot.querySelector('.slot-text');
+                    const previewImg = slot.querySelector('.preview-image');
+                    
+                    // Show/hide slots based on selected count
+                    slot.style.display = index < selectedCount ? 'flex' : 'none';
+                    
+                    if (imageFiles[index]) {
+                        slotText.style.display = 'none';
+                        previewImg.src = `file:///${imageFiles[index]}`;
+                        previewImg.style.display = 'block';
+                        previewImg.onerror = () => {
+                            slotText.style.display = 'block';
+                            previewImg.style.display = 'none';
+                            slotText.textContent = `Image ${index + 1} (Failed to load)`;
+                        };
+                    } else {
+                        slotText.style.display = 'block';
+                        previewImg.style.display = 'none';
+                        slotText.textContent = `Image ${index + 1}`;
+                    }
+                });
+            } catch (error) {
+                console.error('Error updating image previews:', error);
+            }
+        }
+
+        // Time Input Management
+        function createTimeInput() {
+            const timeGroup = document.createElement('div');
+            timeGroup.className = 'time-input-group';
+            timeGroup.innerHTML = `
+                <input type="time" class="time-input">
+                <button class="remove-time" onclick="this.parentElement.remove()">×</button>
+            `;
+            return timeGroup;
+        }
+
+        window.addDailyTime = () => {
+            const timesList = document.getElementById('daily-times-list');
+            timesList.appendChild(createTimeInput());
+        };
+
+        window.addCustomTime = (day) => {
+            const timesList = document.querySelector(`[data-day="${day}"] .time-list`);
+            timesList.appendChild(createTimeInput());
+        };
+
+        // Schedule Configuration
+        function getScheduleConfig() {
+            const activeOption = document.querySelector('.schedule-option.active');
+            if (!activeOption) return null;
+
+            const type = activeOption.dataset.type;
+            const config = { type };
+            
+            switch(type) {
+                case 'interval':
+                    const hours = document.getElementById('interval-hours');
+                    config.intervalHours = hours ? parseInt(hours.value) : 24;
+                    break;
+                case 'daily':
+                    config.dailyTimes = Array.from(
+                        document.getElementById('daily-times-list').querySelectorAll('input[type="time"]')
+                    ).map(input => input.value).filter(Boolean);
+                    break;
+                case 'custom':
+                    config.customSchedule = {};
+                    document.querySelectorAll('.day-schedule').forEach(dayEl => {
+                        const day = parseInt(dayEl.dataset.day);
+                        config.customSchedule[day] = Array.from(
+                            dayEl.querySelectorAll('input[type="time"]')
+                        ).map(input => input.value).filter(Boolean);
+                    });
+                    break;
+            }
+            
+            return config;
+        }
+
+        function validateScheduleConfig(config) {
+            if (!config) {
+                updateStatus('Please select a schedule type', 'error');
+                return false;
+            }
+
+            switch(config.type) {
+                case 'interval':
+                    if (!config.intervalHours || config.intervalHours < 1 || config.intervalHours > 168) {
+                        updateStatus('Interval must be between 1 and 168 hours', 'error');
+                        return false;
+                    }
+                    break;
+                    
+                case 'daily':
+                    if (!config.dailyTimes || config.dailyTimes.length === 0) {
+                        updateStatus('Please add at least one daily time', 'error');
+                        return false;
+                    }
+                    break;
+                    
+                case 'custom':
+                    if (!config.customSchedule) {
+                        updateStatus('Invalid custom schedule configuration', 'error');
+                        return false;
+                    }
+                    const hasAnyTimes = Object.values(config.customSchedule)
+                        .some(times => times && times.length > 0);
+                    if (!hasAnyTimes) {
+                        updateStatus('Please add at least one time to any day', 'error');
+                        return false;
+                    }
+                    break;
+                
+                default:
+                    updateStatus('Invalid schedule type', 'error');
+                    return false;
+            }
+            return true;
+        }
+
+        // Event Listeners Setup
+        function setupEventListeners() {
+            // Message Input
+            elements.messageInput.addEventListener('input', (e) => {
+                const length = e.target.value.length;
+                elements.messageCounter.textContent = `${length}/4096 characters`;
+                enableControls(true);
+
+                // Auto-detect text direction
+                const hasRTL = /[\u0591-\u07FF\uFB1D-\uFDFD\uFE70-\uFEFC]/.test(e.target.value);
+                e.target.dir = hasRTL ? "rtl" : "ltr";
+            });
+
+            // Image Count Selection
+            elements.imageCount.addEventListener('change', () => {
+                updateImagePreviews();
+            });
+
+            // Group Selection
+            elements.groupSelect.addEventListener('change', (e) => {
+                const option = e.target.selectedOptions[0];
+                if (option && option.value) {
+                    const isAlreadySelected = Array.from(state.selectedGroups).some(
+                        group => group.id === option.value
+                    );
+
+                    if (!isAlreadySelected) {
+                        state.selectedGroups.add({
+                            id: option.value,
+                            name: option.text
+                        });
+                        updateSelectedGroupsDisplay();
+                        enableControls(true);
+                    }
+                    
+                    setTimeout(() => {
+                        elements.groupSelect.value = '';
+                    }, 10);
+                }
+            });
+
+            // Schedule Options
+            document.querySelectorAll('.schedule-option').forEach(option => {
+                option.addEventListener('click', () => {
+                    document.querySelectorAll('.schedule-option').forEach(opt => 
+                        opt.classList.remove('active')
+                    );
+                    option.classList.add('active');
+                    updateScheduleDetails(option.dataset.type);
+                });
+            });
+
+            // Send Message Only
+            elements.sendMessageBtn.addEventListener('click', () => {
+                if (state.selectedGroups.size === 0) {
+                    updateStatus('Please select at least one group', 'error');
+                    return;
+                }
+
+                if (!elements.messageInput.value.trim()) {
+                    updateStatus('Please enter a message to send', 'error');
+                    return;
+                }
+                
+                const groupIds = Array.from(state.selectedGroups).map(group => group.id);
+                ipcRenderer.send('send-message', {
+                    groupIds,
+                    message: elements.messageInput.value
+                });
+            });
+
+            // Send With Images
+            elements.sendWithImagesBtn.addEventListener('click', () => {
+                if (state.selectedGroups.size === 0) {
+                    updateStatus('Please select at least one group', 'error');
+                    return;
+                }
+                
+                const groupIds = Array.from(state.selectedGroups).map(group => group.id);
+                ipcRenderer.send('send-images', {
+                    groupIds,
+                    message: elements.messageInput.value,
+                    imageCount: parseInt(elements.imageCount.value)
+                });
+            });
+
+            // Schedule Controls
+            elements.startScheduleBtn.addEventListener('click', () => {
+                if (state.selectedGroups.size === 0) {
+                    updateStatus('Please select at least one group', 'error');
+                    return;
+                }
+
+                const config = getScheduleConfig();
+                if (validateScheduleConfig(config)) {
+                    const groupIds = Array.from(state.selectedGroups).map(group => group.id);
+                    ipcRenderer.send('start-custom-schedule', {
+                        scheduleConfig: config,
+                        groupIds,
+                        message: elements.messageInput.value,
+                        imageCount: parseInt(elements.imageCount.value)
+                    });
+                }
+            });
+
+            elements.stopScheduleBtn.addEventListener('click', () => {
+                ipcRenderer.send('stop-schedule');
+            });
+        }
+
+        // IPC Event Handlers
+        function setupIPCHandlers() {
+            ipcRenderer.on('groups-loaded', (event, groups) => {
+                elements.groupSelect.innerHTML = '<option value="">Select groups...</option>';
+                groups.forEach(group => {
+                    const option = document.createElement('option');
+                    option.value = group.id;
+                    option.textContent = group.name;
+                    elements.groupSelect.appendChild(option);
+                });
+            });
+
+            ipcRenderer.on('qr-code', (event, dataURL) => {
+                elements.qrContainer.style.display = 'block';
+                elements.qrPlaceholder.style.display = 'none';
+                elements.qrCode.src = dataURL;
+                elements.qrCode.style.display = 'block';
+                elements.statusDot.classList.add('disconnected');
+                elements.connectionText.textContent = 'Scan QR code to connect';
+                updateStatus('Scan QR code with WhatsApp');
+            });
+
+            ipcRenderer.on('whatsapp-ready', () => {
+                elements.qrCode.style.display = 'none';
+                elements.qrContainer.style.display = 'none';
+                elements.qrPlaceholder.style.display = 'none';
+                elements.connectionText.textContent = 'Connected to WhatsApp';
+                updateStatus('WhatsApp connected successfully!', 'success');
+                enableControls(true);
+                updateImagePreviews();
+            });
+
+            ipcRenderer.on('disconnected', (event, reason) => {
+                elements.connectionText.textContent = 'Disconnected';
+                elements.qrContainer.style.display = 'block';
+                elements.qrPlaceholder.style.display = 'block';
+                elements.qrCode.style.display = 'none';
+                updateStatus('WhatsApp disconnected: ' + reason, 'error');
+                enableControls(false);
+            });
+
+            ipcRenderer.on('send-complete', (event, data) => {
+                if (data.messageOnly) {
+                    const groupText = data.groupCount > 1 ? `${data.groupCount} groups` : 'group';
+                    updateStatus(`Successfully sent message to ${groupText}!`, 'success');
+                } else {
+                    const messageStatus = data.messageSent ? ' with message' : '';
+                    const groupText = data.groupCount > 1 ? ` to ${data.groupCount} groups` : '';
+                    updateStatus(`Successfully sent ${data.sentCount} images${messageStatus}${groupText}!`, 'success');
+                    updateImagePreviews();
+                }
+            });
+
+            ipcRenderer.on('send-error', (event, error) => {
+                updateStatus(error, 'error');
+            });
+
+            ipcRenderer.on('activity-update', (event, activities) => {
+                updateActivityList(activities);
+            });
+
+            ipcRenderer.on('schedule-started', (event, data) => {
+                const scheduleType = data.scheduleType;
+                const groupText = data.groupCount > 1 ? ` for ${data.groupCount} groups` : '';
+                updateStatus(`${scheduleType} schedule started${groupText}`, 'success');
+                elements.stopScheduleBtn.disabled = false;
+            });
+
+            ipcRenderer.on('schedule-stopped', () => {
+                updateStatus('Schedule stopped', 'success');
+                elements.countdown.textContent = 'Next send in: --:--:--';
+                elements.stopScheduleBtn.disabled = true;
+            });
+
+            ipcRenderer.on('countdown-update', (event, data) => {
+                const { hours, minutes, seconds } = data;
+                elements.countdown.textContent = 
+                    `Next send in: ${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            });
+
+            ipcRenderer.on('image-previews-update', (event, imageFiles) => {
+                const selectedCount = parseInt(elements.imageCount.value);
+                elements.imageSlots.forEach((slot, index) => {
+                    const slotText = slot.querySelector('.slot-text');
+                    const previewImg = slot.querySelector('.preview-image');
+                    
+                    // Show/hide slots based on selected count
+                    slot.style.display = index < selectedCount ? 'flex' : 'none';
+                    
+                    if (imageFiles[index]) {
+                        slotText.style.display = 'none';
+                        previewImg.src = `file:///${imageFiles[index]}`;
+                        previewImg.style.display = 'block';
+                    } else {
+                        slotText.style.display = 'block';
+                        previewImg.style.display = 'none';
+                    }
+                });
+            });
+        }
+
+        // Initialize Application
+        function initializeApp() {
+            setupEventListeners();
+            setupIPCHandlers();
+            updateScheduleDetails('interval');
+            enableControls(false);
+            updateImagePreviews();
+        }
+
+        // Start the application
+        initializeApp();
+    </script>
+</body>
+</html>
