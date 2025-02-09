@@ -1,8 +1,20 @@
-# WhatsApp-Group-Sender
+# WhatsApp Group Sender
 
 A desktop application built with Electron that allows you to send scheduled messages and images to multiple WhatsApp groups. The application provides an intuitive interface for managing WhatsApp group communications with features like message scheduling, image queuing, and activity tracking.
 
-![Application Screenshot](screenshot.png)
+## Application Interface
+
+### Main Interface
+![Main Interface](assets/screenshots/main-interface.png)
+*The main application interface showing message composition, image slots, and group selection*
+
+### Connected State
+![Connected State](assets/screenshots/connected-state.png)
+*Application successfully connected to WhatsApp with groups loaded*
+
+### Image Sending Interface
+![Image Sending](assets/screenshots/sending-images.png)
+*Image sending interface with preview slots and sending controls*
 
 ## Features
 
