@@ -245,8 +245,8 @@ This will create distributable files in the `dist` directory.
 ## Contact & Support
 
 - **Developer**: Wahba
-- **Email**: [heywahba@gmail.com]
-- **LinkedIn**: [https://www.linkedin.com/in/heywahba/]
+- **Email**: heywahba@gmail.com
+- **LinkedIn**: https://www.linkedin.com/in/heywahba/
 - **GitHub**: [@Realwahba](https://github.com/Realwahba)
 
 ### Support My Work
